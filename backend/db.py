@@ -5,6 +5,7 @@ host = "mongodb+srv://admin:1234@cluster0.0kgm7.mongodb.net/myFirstDatabase?retr
 db_name = 'impact'
 db = MongoClient(host)[db_name]
 
+
 def stringify_object_id(obj):
     if type(obj) is list:
         [stringify_object_id(o) for o in obj]
@@ -14,6 +15,7 @@ def stringify_object_id(obj):
                 obj[k] = str(obj[k])
             else:
                 stringify_object_id(obj[k])
+
 
 def signup(user):
     get_new_user = get_user(user['email'])
@@ -46,6 +48,18 @@ def login(user):
         return "No such email exists"
 
 
+def updateProject(project):
+    return db.projects.update_one(
+        {
+            '_id': ObjectId(project['id'])
+        },
+        {
+            '$push': {
+                'images': project['image']
+            }
+        }
+    )
+
 
 def addProject(project):
     return str(db.projects.insert_one({
@@ -57,8 +71,13 @@ def addProject(project):
         'users': project['users'],
     }).inserted_id)
 
-def get_projects(email):
-    projects = list(db.projects.find({'email': email}))
+
+def get_projects(email=None, id=None):
+    projects = []
+    if email:
+        projects = list(db.projects.find({'email': email}))
+    if id:
+        projects = dict(db.projects.find_one({'_id': ObjectId(id)}))
     stringify_object_id(projects)
     if projects:
         return projects
