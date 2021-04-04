@@ -21,6 +21,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
 class UserView(APIView):
 
     def post(self, request):
@@ -60,7 +61,7 @@ class ProjectView(APIView):
         project['contractors'] = data.get('contractors')
         project['users'] = data.get('users')
         project['_id'] = data.get('id')
-        #project['image'] = data.get('image')
+        # project['image'] = data.get('image')
         if project['action'] == "Add":
             res = db.addProject(project)
             if res is not None:
@@ -81,21 +82,26 @@ class ProjectView(APIView):
                 return Response({'result': res}, status=status.HTTP_200_OK)
             else:
                 return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
-
+        elif project['action'] == "GET_IMAGE_BY_ID":
+            res = db.get_images(project_id=project['_id'])
+            print(res)
+            if res is not None:
+                return Response({'result': res}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
-        project = {}
+        Image = {}
         image = request.data['file']
         image_type = request.data['type']
-        project['id'] = request.data['id']
+        Image['id'] = request.data['id']
         Backend.objects.create(image=image)
         with open(os.path.join(BASE_DIR, f'media\\post_images\\{image}'), "rb") as img_file:
             my_string = base64.b64encode(img_file.read())
-        project['image'] = f"data:{image_type};base64,"+my_string.decode('utf-8')
-        res = db.updateProject(project)
+        Image['image'] = f"data:{image_type};base64," + my_string.decode('utf-8')
+        res = db.addImage(Image)
         if res is not None:
             shutil.rmtree(os.path.join(BASE_DIR, 'media\\post_images'))
             return Response({'result': 'success'}, status=status.HTTP_200_OK)
         else:
             return Response({'result': 'failure'}, status=status.HTTP_200_OK)
-

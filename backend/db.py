@@ -48,17 +48,11 @@ def login(user):
         return "No such email exists"
 
 
-def updateProject(project):
-    return db.projects.update_one(
-        {
-            '_id': ObjectId(project['id'])
-        },
-        {
-            '$push': {
-                'images': project['image']
-            }
-        }
-    )
+def addImage(Image):
+    return str(db.Images.insert_one({
+        'project_id': ObjectId(Image['id']),
+        'image': Image['image']
+    }).inserted_id)
 
 
 def addProject(project):
@@ -81,5 +75,18 @@ def get_projects(email=None, id=None):
     stringify_object_id(projects)
     if projects:
         return projects
+    else:
+        return None
+
+
+def get_images(id=None, project_id=None):
+    Images = []
+    if project_id:
+        Images = dict(db.Images.find_one({'project_id': ObjectId(project_id)}))
+    if id:
+        Images = dict(db.Images.find_one({'_id': ObjectId(id)}))
+    stringify_object_id(Images)
+    if Images:
+        return Images
     else:
         return None
