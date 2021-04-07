@@ -61,7 +61,10 @@ class ProjectView(APIView):
         project['contractors'] = data.get('contractors')
         project['users'] = data.get('users')
         project['_id'] = data.get('id')
-        # project['image'] = data.get('image')
+        project ['project_id'] = data.get('project_id')
+        project ['worktype'] = data.get('worktype')
+        project ['contractor'] = data.get('contractor')
+        project['image'] = data.get('image')
         if project['action'] == "Add":
             res = db.addProject(project)
             if res is not None:
@@ -89,6 +92,12 @@ class ProjectView(APIView):
                 return Response({'result': res}, status=status.HTTP_200_OK)
             else:
                 return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "UPDATE_IMAGE_BY_ID":
+            res = db.update_image(project)
+            if res is not None:
+                return Response({'result': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         Image = {}

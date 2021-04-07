@@ -82,7 +82,7 @@ def get_projects(email=None, id=None):
 def get_images(id=None, project_id=None):
     Images = []
     if project_id:
-        Images = dict(db.Images.find_one({'project_id': ObjectId(project_id)}))
+        Images = list(db.Images.find({'project_id': ObjectId(project_id)}))
     if id:
         Images = dict(db.Images.find_one({'_id': ObjectId(id)}))
     stringify_object_id(Images)
@@ -90,3 +90,21 @@ def get_images(id=None, project_id=None):
         return Images
     else:
         return None
+
+
+def update_image(project):
+    return db.Images.update(
+        {
+            '_id': ObjectId(project['_id'])
+        },
+        {
+            '$push': {
+                'worktype': project['worktype'],
+                'contractor': project['contractor'],
+                'description': project['description'],
+            },
+            '$set': {
+                'image': project['image']
+            }
+        }
+    )
