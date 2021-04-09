@@ -142,7 +142,7 @@ class ProjectView(APIView):
         Image['image'] = f"data:{image_type};base64," + my_string.decode('utf-8')
         res = db.addImage(Image)
         if res is not None:
-            shutil.rmtree(os.path.join(BASE_DIR, 'media\\post_images'))
+            shutil.rmtree(os.path.join(BASE_DIR, 'media/post_images'))
             return Response({'result': 'success'}, status=status.HTTP_200_OK)
         else:
             return Response({'result': 'failure'}, status=status.HTTP_200_OK)
