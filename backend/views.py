@@ -64,7 +64,8 @@ class ProjectView(APIView):
         project ['project_id'] = data.get('project_id')
         project ['worktype'] = data.get('worktype')
         project ['contractor'] = data.get('contractor')
-        project['image'] = data.get('image')
+        project ['elements'] = data.get('element')
+        project ['notification'] = data.get('notification')
         if project['action'] == "Add":
             res = db.addProject(project)
             if res is not None:
@@ -92,10 +93,41 @@ class ProjectView(APIView):
                 return Response({'result': res}, status=status.HTTP_200_OK)
             else:
                 return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
+
+        elif project['action'] == "GET_IMAGE_BY_IDs":
+            res = db.get_images(id=project['_id'])
+            print(res)
+            if res is not None:
+                return Response({'result': res}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
+
         elif project['action'] == "UPDATE_IMAGE_BY_ID":
+            element_list = []
+            if(len(project['elements']) > 1):
+                element_list.append(project['elements'][-1])
+                project['elements'] = element_list
             res = db.update_image(project)
             if res is not None:
                 return Response({'result': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "DELETE_PROJECT":
+            res = db.delete_project(project)
+            if res is not None:
+                return Response({'result': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "NOTIFICATION":
+            res = db.updateNotification(project)
+            if res is not None:
+                return Response({'result': 'success'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "GET_NOTIFICATION":
+            res = db.getNotification(project)
+            if res is not None:
+                return Response({'result': res}, status=status.HTTP_200_OK)
             else:
                 return Response({'result': 'failure'}, status=status.HTTP_200_OK)
 
@@ -105,7 +137,7 @@ class ProjectView(APIView):
         image_type = request.data['type']
         Image['id'] = request.data['id']
         Backend.objects.create(image=image)
-        with open(os.path.join(BASE_DIR, f'media\\post_images\\{image}'), "rb") as img_file:
+        with open(os.path.join(BASE_DIR, f'media/post_images/{image}'), "rb") as img_file:
             my_string = base64.b64encode(img_file.read())
         Image['image'] = f"data:{image_type};base64," + my_string.decode('utf-8')
         res = db.addImage(Image)
@@ -114,3 +146,4 @@ class ProjectView(APIView):
             return Response({'result': 'success'}, status=status.HTTP_200_OK)
         else:
             return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+

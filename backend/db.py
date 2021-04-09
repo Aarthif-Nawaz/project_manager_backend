@@ -20,11 +20,14 @@ def stringify_object_id(obj):
 def signup(user):
     get_new_user = get_user(user['email'])
     if get_new_user is None:
-        return str(db.users.insert_one({
+        db.users.insert_one({
             'name': user['name'],
             'email': user['email'],
             'password': user['password']
-        }).inserted_id)
+        })
+        db.Notifications.insert_one({
+            'email': user['email']
+        })
     else:
         return "Email Exists"
 
@@ -102,9 +105,34 @@ def update_image(project):
                 'worktype': project['worktype'],
                 'contractor': project['contractor'],
                 'description': project['description'],
-            },
-            '$set': {
-                'image': project['image']
+                'elements': project['elements']
             }
         }
     )
+
+
+def delete_project(project):
+    return db.projects.delete_one({
+        '_id': ObjectId(project['_id'])
+    })
+
+
+def updateNotification(project):
+    return db.Notifications.update(
+        {
+            'email': project['email']
+        },
+        {
+            '$push': {
+                'notifications': project['notification']
+            }
+        }
+    )
+
+
+def getNotification(project):
+    notifications = dict(db.Notifications.find_one({'email': project['email']}))
+    stringify_object_id(notifications)
+    if notifications:
+        return notifications
+    return None
