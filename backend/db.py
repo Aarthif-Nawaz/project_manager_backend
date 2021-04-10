@@ -69,10 +69,12 @@ def addProject(project):
     }).inserted_id)
 
 
-def get_projects(email=None, id=None):
+def get_projects(email=None, id=None, user=None):
     projects = []
     if email:
         projects = list(db.projects.find({'email': email}))
+    if user:
+        projects = list(db.projects.find({'users': {"$in": [user]}}))
     if id:
         projects = dict(db.projects.find_one({'_id': ObjectId(id)}))
     stringify_object_id(projects)
@@ -93,6 +95,30 @@ def get_images(id=None, project_id=None):
         return Images
     else:
         return None
+
+
+def update_project(project):
+    query = {}
+    if 'name' in project:
+        query['name'] = project['name']
+    if 'description' in project:
+        query['description'] = project['description']
+    if 'worktypes' in project:
+        query['worktypes'] = project['worktypes']
+    if 'contractors' in project:
+        query['contractors'] = project['contractors']
+    if 'users' in project:
+        query['users'] = project['users']
+
+    return db.projects.update(
+        {
+            '_id': ObjectId(project['_id'])
+        },
+        {
+            '$set': query
+
+        }
+    )
 
 
 def update_image(project):

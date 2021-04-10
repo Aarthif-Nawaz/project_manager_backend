@@ -14,7 +14,7 @@ from .serializers import BackendSerializer
 from .models import Backend
 import base64
 import cv2
-
+from pdf2image import convert_from_path
 import os
 from pathlib import Path
 
@@ -66,6 +66,7 @@ class ProjectView(APIView):
         project ['contractor'] = data.get('contractor')
         project ['elements'] = data.get('element')
         project ['notification'] = data.get('notification')
+        project ['user'] = data.get('user')
         if project['action'] == "Add":
             res = db.addProject(project)
             if res is not None:
@@ -74,6 +75,13 @@ class ProjectView(APIView):
                 return Response({'result': 'failure'}, status=status.HTTP_200_OK)
         elif project['action'] == "GET":
             res = db.get_projects(email=project['email'])
+            print(res)
+            if res is not None:
+                return Response({'result': res}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "GET_BY_USER":
+            res = db.get_projects(user=project['user'])
             print(res)
             if res is not None:
                 return Response({'result': res}, status=status.HTTP_200_OK)
@@ -128,6 +136,12 @@ class ProjectView(APIView):
             res = db.getNotification(project)
             if res is not None:
                 return Response({'result': res}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "UPDATE_PROJECT_BY_ID":
+            res = db.update_project(project)
+            if res is not None:
+                return Response({'result': "success"}, status=status.HTTP_200_OK)
             else:
                 return Response({'result': 'failure'}, status=status.HTTP_200_OK)
 
