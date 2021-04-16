@@ -5,16 +5,17 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
+import time
 from rest_framework.views import APIView
 import requests
 import shutil
+from pdf2image import convert_from_path
 from . import db
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import BackendSerializer
 from .models import Backend
 import base64
 import cv2
-from pdf2image import convert_from_path
 import os
 from pathlib import Path
 
@@ -150,10 +151,24 @@ class ProjectView(APIView):
         image = request.data['file']
         image_type = request.data['type']
         Image['id'] = request.data['id']
-        Backend.objects.create(image=image)
-        with open(os.path.join(BASE_DIR, f'media/post_images/{image}'), "rb") as img_file:
-            my_string = base64.b64encode(img_file.read())
-        Image['image'] = f"data:{image_type};base64," + my_string.decode('utf-8')
+        image_name = request.data['name']
+        image_name = str(image_name).split(".")[0]
+        if image_type == "application/pdf":
+            Backend.objects.create(pdf=image)
+            time.sleep(2)
+            images = convert_from_path(os.path.join(BASE_DIR, f'media/post_images/{image}'))
+            for i in range(len(images)):
+                images[i].save(os.path.join(BASE_DIR, f'media/post_images/{image_name}.jpg'), 'JPEG')
+            os.remove(os.path.join(BASE_DIR, f'media/post_images/{image}'))
+            with open(os.path.join(BASE_DIR, f'media/post_images/{image_name}.jpg'), "rb") as img_file:
+                my_string = base64.b64encode(img_file.read())
+            Image['image'] = "data:image/jpeg;base64," + my_string.decode('utf-8')
+        else:
+            Image['id'] = request.data['id']
+            Backend.objects.create(image=image)
+            with open(os.path.join(BASE_DIR, f'media/post_images/{image}'), "rb") as img_file:
+                my_string = base64.b64encode(img_file.read())
+            Image['image'] = f"data:{image_type};base64," + my_string.decode('utf-8')
         res = db.addImage(Image)
         if res is not None:
             shutil.rmtree(os.path.join(BASE_DIR, 'media/post_images'))

@@ -5,6 +5,7 @@ from django.db import models
 
 class Backend(models.Model):
     image = models.ImageField(upload_to='post_images')
+    pdf = models.FileField(upload_to='post_images')
 
     def __str__(self):
         return self.image
