@@ -112,10 +112,10 @@ class ProjectView(APIView):
                 return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
 
         elif project['action'] == "UPDATE_IMAGE_BY_ID":
-            element_list = []
-            if(len(project['elements']) > 1):
-                element_list.append(project['elements'][-1])
-                project['elements'] = element_list
+            # element_list = []
+            # if(len(project['elements']) > 1):
+            #     element_list.append(project['elements'][-1])
+            #     project['elements'] = element_list
             res = db.update_image(project)
             if res is not None:
                 return Response({'result': 'success'}, status=status.HTTP_200_OK)

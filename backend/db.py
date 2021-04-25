@@ -130,7 +130,9 @@ def update_image(project):
             '$push': {
                 'worktype': project['worktype'],
                 'contractor': project['contractor'],
-                'description': project['description'],
+                'description': project['description']
+            },
+            '$set': {
                 'elements': project['elements']
             }
         }
