@@ -130,14 +130,43 @@ def update_image(project):
             '$push': {
                 'worktype': project['worktype'],
                 'contractor': project['contractor'],
-                'description': project['description']
-            },
-            '$set': {
+                'description': project['description'],
                 'elements': project['elements']
             }
         }
     )
 
+
+def erase_element(project):
+    db.Images.update(
+        {
+            '_id': ObjectId(project['_id'])
+        },
+        {
+            "$unset": {
+                f"elements.{project['index']}": 1,
+                f"worktype.{project['index']}": 1,
+                f"description.{project['index']}": 1,
+                f"contractor.{project['index']}": 1,
+            }
+        }
+    )
+
+    db.Images.update(
+        {
+            '_id': ObjectId(project['_id'])
+        },
+        {
+            "$pull": {
+                "elements": None,
+                'worktype': None,
+                'description':  None,
+                'contractor': None,
+            }
+        }
+    )
+
+    return "Success"
 
 def delete_project(project):
     return db.projects.delete_one({

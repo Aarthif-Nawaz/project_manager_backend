@@ -56,6 +56,7 @@ class ProjectView(APIView):
         project = {}
         project['action'] = data.get('action', None)
         project['email'] = data.get('email')
+        project['index'] = data.get('index')
         project['name'] = data.get('name')
         project['description'] = data.get('description')
         project['worktypes'] = data.get('worktypes')
@@ -112,10 +113,10 @@ class ProjectView(APIView):
                 return Response({'result': 'Failure'}, status=status.HTTP_200_OK)
 
         elif project['action'] == "UPDATE_IMAGE_BY_ID":
-            # element_list = []
-            # if(len(project['elements']) > 1):
-            #     element_list.append(project['elements'][-1])
-            #     project['elements'] = element_list
+            element_list = []
+            if(len(project['elements']) > 1):
+                element_list.append(project['elements'][-1])
+                project['elements'] = element_list
             res = db.update_image(project)
             if res is not None:
                 return Response({'result': 'success'}, status=status.HTTP_200_OK)
@@ -141,6 +142,13 @@ class ProjectView(APIView):
                 return Response({'result': 'failure'}, status=status.HTTP_200_OK)
         elif project['action'] == "UPDATE_PROJECT_BY_ID":
             res = db.update_project(project)
+            if res is not None:
+                return Response({'result': "success"}, status=status.HTTP_200_OK)
+            else:
+                return Response({'result': 'failure'}, status=status.HTTP_200_OK)
+        elif project['action'] == "ERASE_IMAGE":
+            project['index'] = int(project['index'])
+            res = db.erase_element(project)
             if res is not None:
                 return Response({'result': "success"}, status=status.HTTP_200_OK)
             else:
